@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 interface TaskDetailProps {
@@ -41,6 +41,23 @@ export function TaskDetail({ task, members, taskGroups, userGroupId }: TaskDetai
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [changingStatus, setChangingStatus] = useState(false);
+  const [completing, setCompleting] = useState(false);
+  const [completionsInPeriod, setCompletionsInPeriod] = useState(0);
+
+  const fetchCompletions = useCallback(async () => {
+    if (!task.recurrence) return;
+    try {
+      const res = await fetch(`/api/tasks/${task.id}/complete`);
+      if (res.ok) {
+        const data = await res.json();
+        setCompletionsInPeriod(data.completionsInPeriod);
+      }
+    } catch { /* ignore */ }
+  }, [task.id, task.recurrence]);
+
+  useEffect(() => {
+    fetchCompletions();
+  }, [fetchCompletions]);
 
   const statusLabels: Record<string, string> = {
     pending: "Pendente",
@@ -140,6 +157,57 @@ export function TaskDetail({ task, members, taskGroups, userGroupId }: TaskDetai
     } finally {
       setChangingStatus(false);
     }
+  }
+
+  async function handleComplete() {
+    setCompleting(true);
+    setError("");
+
+    try {
+      const res = await fetch(`/api/tasks/${task.id}/complete`, {
+        method: "POST",
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || "Erro ao registrar conclusão");
+        return;
+      }
+
+      const data = await res.json();
+      setCompletionsInPeriod(data.completionsInPeriod);
+
+      if (task.recurrence) {
+        if (data.completionsInPeriod >= task.recurrenceQuantity) {
+          setCurrentStatus("done");
+          setStatus("done");
+        } else {
+          setCurrentStatus("in_progress");
+          setStatus("in_progress");
+        }
+      } else {
+        setCurrentStatus("done");
+        setStatus("done");
+      }
+
+      router.refresh();
+    } catch {
+      setError("Erro ao registrar conclusão. Tente novamente.");
+    } finally {
+      setCompleting(false);
+    }
+  }
+
+  const isRecurrentComplete = task.recurrence && completionsInPeriod >= task.recurrenceQuantity;
+  const showActionButton = currentStatus !== "done" || (task.recurrence && !isRecurrentComplete);
+
+  function getActionButtonLabel() {
+    if (completing) return "Registrando...";
+    if (currentStatus === "pending") return "Iniciar tarefa";
+    if (task.recurrence) {
+      return `Marcar como feito (${completionsInPeriod}/${task.recurrenceQuantity})`;
+    }
+    return "Marcar como feito";
   }
 
   if (editing) {
@@ -399,6 +467,22 @@ export function TaskDetail({ task, members, taskGroups, userGroupId }: TaskDetai
             </span>
           </div>
         )}
+        {task.recurrence && (
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-zinc-500 dark:text-zinc-400">Progresso no período</span>
+              <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                {completionsInPeriod}/{task.recurrenceQuantity}
+              </span>
+            </div>
+            <div className="h-2 w-full rounded-full bg-zinc-200 dark:bg-zinc-800">
+              <div
+                className="h-2 rounded-full bg-green-500 transition-all dark:bg-green-400"
+                style={{ width: `${Math.min(100, (completionsInPeriod / task.recurrenceQuantity) * 100)}%` }}
+              />
+            </div>
+          </div>
+        )}
         <div className="flex items-center justify-between text-sm">
           <span className="text-zinc-500 dark:text-zinc-400">Criada em</span>
           <span className="text-zinc-600 dark:text-zinc-300">
@@ -409,6 +493,17 @@ export function TaskDetail({ task, members, taskGroups, userGroupId }: TaskDetai
 
       {error && (
         <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+      )}
+
+      {/* Action button */}
+      {showActionButton && (
+        <button
+          onClick={handleComplete}
+          disabled={completing}
+          className="w-full rounded-lg bg-green-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-green-500 disabled:opacity-50 dark:bg-green-500 dark:hover:bg-green-400"
+        >
+          {getActionButtonLabel()}
+        </button>
       )}
 
       {/* Actions */}
