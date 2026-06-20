@@ -13,6 +13,7 @@ interface TaskDetailProps {
     assignedTo: string | null;
     dueDate: string | null;
     recurrence: string | null;
+    recurrenceQuantity: number;
     overdue: boolean;
     createdAt: string;
     updatedAt: string;
@@ -35,6 +36,7 @@ export function TaskDetail({ task, members, taskGroups, userGroupId }: TaskDetai
     task.dueDate ? task.dueDate.split("T")[0] : ""
   );
   const [recurrence, setRecurrence] = useState(task.recurrence || "");
+  const [recurrenceQuantity, setRecurrenceQuantity] = useState(task.recurrenceQuantity || 1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
@@ -69,6 +71,7 @@ export function TaskDetail({ task, members, taskGroups, userGroupId }: TaskDetai
           groupId: groupId || null,
           dueDate: dueDate || null,
           recurrence: recurrence || null,
+          recurrenceQuantity: recurrence ? recurrenceQuantity : undefined,
         }),
       });
 
@@ -286,6 +289,25 @@ export function TaskDetail({ task, members, taskGroups, userGroupId }: TaskDetai
           </select>
         </div>
 
+        {recurrence && (
+          <div>
+            <label
+              htmlFor="edit-recurrence-quantity"
+              className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+            >
+              Quantidade por período
+            </label>
+            <input
+              id="edit-recurrence-quantity"
+              type="number"
+              min={1}
+              value={recurrenceQuantity}
+              onChange={(e) => setRecurrenceQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+              className="w-full rounded-lg border border-zinc-300 bg-white px-3.5 py-2.5 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-400 dark:focus:ring-zinc-400"
+            />
+          </div>
+        )}
+
         {error && (
           <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
         )}
@@ -374,6 +396,7 @@ export function TaskDetail({ task, members, taskGroups, userGroupId }: TaskDetai
             <span className="text-zinc-500 dark:text-zinc-400">Recorrência</span>
             <span className="font-medium text-zinc-900 dark:text-zinc-100">
               {task.recurrence === "daily" ? "Diária" : task.recurrence === "weekly" ? "Semanal" : "Mensal"}
+              {task.recurrenceQuantity > 1 && ` (${task.recurrenceQuantity}x)`}
             </span>
           </div>
         )}

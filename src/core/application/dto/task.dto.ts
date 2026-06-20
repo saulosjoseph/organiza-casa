@@ -9,6 +9,7 @@ export interface CreateTaskDto {
   assignedTo?: string | null;
   dueDate?: string | null;
   recurrence?: TaskRecurrence;
+  recurrenceQuantity?: number;
 }
 
 export interface UpdateTaskDto {
@@ -20,6 +21,7 @@ export interface UpdateTaskDto {
   assignedTo?: string | null;
   dueDate?: string | null;
   recurrence?: TaskRecurrence;
+  recurrenceQuantity?: number;
 }
 
 export interface TaskResponseDto {
@@ -32,6 +34,7 @@ export interface TaskResponseDto {
   assignedTo: string | null;
   dueDate: string | null;
   recurrence: TaskRecurrence;
+  recurrenceQuantity: number;
   overdue: boolean;
   createdAt: string;
   updatedAt: string;

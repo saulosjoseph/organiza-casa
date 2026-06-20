@@ -62,6 +62,7 @@ export default async function GrupoPage({ params }: PageProps) {
       groupId: t.groupId,
       dueDate: t.dueDate ? t.dueDate.toISOString() : null,
       recurrence: t.recurrence,
+      recurrenceQuantity: t.recurrenceQuantity,
       overdue: t.overdue,
     }));
 

@@ -18,6 +18,7 @@ interface Task {
   groupId: string | null;
   dueDate: string | null;
   recurrence: string | null;
+  recurrenceQuantity: number;
   overdue: boolean;
 }
 
@@ -283,7 +284,7 @@ function TaskCard({ task }: { task: Task }) {
         )}
         {task.recurrence && (
           <span className="text-xs text-zinc-400 dark:text-zinc-500">
-            🔄 {recurrenceLabels[task.recurrence]}
+            🔄 {recurrenceLabels[task.recurrence]}{task.recurrenceQuantity > 1 ? ` (${task.recurrenceQuantity}x)` : ""}
           </span>
         )}
         <span

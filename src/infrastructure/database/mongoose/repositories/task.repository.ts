@@ -15,6 +15,7 @@ function toEntity(doc: TaskDocument): Task {
     assignedTo: doc.assignedTo ? doc.assignedTo.toString() : null,
     dueDate: doc.dueDate,
     recurrence: doc.recurrence ?? null,
+    recurrenceQuantity: doc.recurrenceQuantity ?? 1,
     overdue: doc.overdue ?? false,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
@@ -33,6 +34,7 @@ export class MongoTaskRepository implements TaskRepositoryPort {
       assignedTo: data.assignedTo ?? null,
       dueDate: data.dueDate ? new Date(data.dueDate) : null,
       recurrence: data.recurrence ?? null,
+      recurrenceQuantity: data.recurrenceQuantity ?? 1,
     });
     return toEntity(doc as TaskDocument);
   }
@@ -50,6 +52,7 @@ export class MongoTaskRepository implements TaskRepositoryPort {
       assignedTo: doc.assignedTo ? doc.assignedTo.toString() : null,
       dueDate: doc.dueDate,
       recurrence: (doc as unknown as { recurrence: string | null }).recurrence ?? null,
+      recurrenceQuantity: (doc as unknown as { recurrenceQuantity: number }).recurrenceQuantity ?? 1,
       overdue: (doc as unknown as { overdue: boolean }).overdue ?? false,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
@@ -74,6 +77,7 @@ export class MongoTaskRepository implements TaskRepositoryPort {
     if (data.dueDate !== undefined)
       updateData.dueDate = data.dueDate ? new Date(data.dueDate) : null;
     if (data.recurrence !== undefined) updateData.recurrence = data.recurrence;
+    if (data.recurrenceQuantity !== undefined) updateData.recurrenceQuantity = data.recurrenceQuantity;
 
     const doc = await TaskModel.findByIdAndUpdate(id, updateData, {
       new: true,
