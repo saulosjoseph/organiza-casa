@@ -10,6 +10,7 @@ export interface TaskDocument extends Document {
   assignedTo: mongoose.Types.ObjectId | null;
   dueDate: Date | null;
   recurrence: TaskRecurrence;
+  overdue: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -32,6 +33,7 @@ const TaskSchema = new Schema<TaskDocument>(
       enum: ["daily", "weekly", "monthly", null],
       default: null,
     },
+    overdue: { type: Boolean, default: false },
   },
   {
     timestamps: true,

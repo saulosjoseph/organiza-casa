@@ -17,6 +17,7 @@ function toResponseDto(task: Task): TaskResponseDto {
     assignedTo: task.assignedTo,
     dueDate: task.dueDate ? task.dueDate.toISOString() : null,
     recurrence: task.recurrence,
+    overdue: task.overdue,
     createdAt: task.createdAt.toISOString(),
     updatedAt: task.updatedAt.toISOString(),
   };

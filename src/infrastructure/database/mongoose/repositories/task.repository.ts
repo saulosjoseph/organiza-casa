@@ -15,6 +15,7 @@ function toEntity(doc: TaskDocument): Task {
     assignedTo: doc.assignedTo ? doc.assignedTo.toString() : null,
     dueDate: doc.dueDate,
     recurrence: doc.recurrence ?? null,
+    overdue: doc.overdue ?? false,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
   };
@@ -49,6 +50,7 @@ export class MongoTaskRepository implements TaskRepositoryPort {
       assignedTo: doc.assignedTo ? doc.assignedTo.toString() : null,
       dueDate: doc.dueDate,
       recurrence: (doc as unknown as { recurrence: string | null }).recurrence ?? null,
+      overdue: (doc as unknown as { overdue: boolean }).overdue ?? false,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
     }));

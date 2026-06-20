@@ -32,6 +32,7 @@ export interface TaskResponseDto {
   assignedTo: string | null;
   dueDate: string | null;
   recurrence: TaskRecurrence;
+  overdue: boolean;
   createdAt: string;
   updatedAt: string;
 }

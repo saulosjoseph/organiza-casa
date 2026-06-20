@@ -12,6 +12,7 @@ export interface Task {
   assignedTo: string | null;
   dueDate: Date | null;
   recurrence: TaskRecurrence;
+  overdue: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
