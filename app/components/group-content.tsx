@@ -122,7 +122,10 @@ export function GroupContent({
       {/* Task Groups */}
       {groupedTasks.map((group) => (
         <div key={group.id}>
-          <h3 className="mb-3 flex items-center gap-2 text-base font-medium text-zinc-900 dark:text-zinc-50">
+          <a
+            href={`/grupo-tarefas/${group.id}`}
+            className="mb-3 flex items-center gap-2 text-base font-medium text-zinc-900 transition-colors hover:text-zinc-600 dark:text-zinc-50 dark:hover:text-zinc-300"
+          >
             <svg
               className="h-4 w-4 text-zinc-400"
               fill="none"
@@ -142,7 +145,7 @@ export function GroupContent({
                 — {group.description}
               </span>
             )}
-          </h3>
+          </a>
           {group.tasks.length === 0 ? (
             <p className="ml-6 text-sm text-zinc-400 dark:text-zinc-500">
               Nenhuma tarefa neste grupo.
