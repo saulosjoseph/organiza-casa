@@ -1,9 +1,11 @@
 import { auth } from "@/src/infrastructure/auth/auth";
 import { MongoTaskRepository } from "@/src/infrastructure/database/mongoose/repositories/task.repository";
 import { MongoTaskGroupRepository } from "@/src/infrastructure/database/mongoose/repositories/task-group.repository";
+import { MongoUserGroupRepository } from "@/src/infrastructure/database/mongoose/repositories/user-group.repository";
 import { MongoTaskCompletionRepository } from "@/src/infrastructure/database/mongoose/repositories/task-completion.repository";
 import { ListTasksUseCase } from "@/src/core/application/use-cases/list-tasks.use-case";
 import { ListTaskGroupsUseCase } from "@/src/core/application/use-cases/list-task-groups.use-case";
+import { ListUserGroupsUseCase } from "@/src/core/application/use-cases/list-user-groups.use-case";
 import { redirect } from "next/navigation";
 import { notFound } from "next/navigation";
 
@@ -54,13 +56,16 @@ export default async function MinhasTarefasPage({ params }: PageProps) {
 
   const taskRepository = new MongoTaskRepository();
   const taskGroupRepository = new MongoTaskGroupRepository();
+  const userGroupRepository = new MongoUserGroupRepository();
 
   const listTasksUseCase = new ListTasksUseCase(taskRepository);
   const listTaskGroupsUseCase = new ListTaskGroupsUseCase(taskGroupRepository);
+  const listUserGroupsUseCase = new ListUserGroupsUseCase(userGroupRepository);
 
-  const [allTasks, allTaskGroups] = await Promise.all([
+  const [allTasks, allTaskGroups, allUserGroups] = await Promise.all([
     listTasksUseCase.execute(),
     listTaskGroupsUseCase.execute(),
+    listUserGroupsUseCase.execute(session.user.id),
   ]);
 
   let filteredTasks;
@@ -107,23 +112,51 @@ export default async function MinhasTarefasPage({ params }: PageProps) {
     );
   }
 
-  const taskGroupMap = new Map(allTaskGroups.map((g) => [g.id, g.name]));
+  const taskGroupMap = new Map(allTaskGroups.map((g) => [g.id, g]));
+  const userGroupMap = new Map(allUserGroups.map((g) => [g.id, g.name]));
 
-  // Group tasks by task group
-  const grouped = new Map<string | null, typeof filteredTasks>();
-  for (const task of filteredTasks) {
-    const key = task.groupId;
-    if (!grouped.has(key)) {
-      grouped.set(key, []);
-    }
-    grouped.get(key)!.push(task);
+  // Build task group -> user group mapping
+  const taskGroupToUserGroup = new Map<string, string | null>();
+  for (const tg of allTaskGroups) {
+    taskGroupToUserGroup.set(tg.id, tg.userGroupId);
   }
 
-  // Sort: grouped first, then ungrouped
-  const sortedGroups = Array.from(grouped.entries()).sort(([a], [b]) => {
-    if (a === null) return 1;
-    if (b === null) return -1;
-    return (taskGroupMap.get(a) ?? "").localeCompare(taskGroupMap.get(b) ?? "");
+  // Group tasks by user group, then by task group
+  // Key: "userGroupId|taskGroupId" or "userGroupId|null" or "null|null"
+  interface TaskSection {
+    userGroupId: string | null;
+    userGroupName: string | null;
+    taskGroupId: string | null;
+    taskGroupName: string | null;
+    tasks: typeof filteredTasks;
+  }
+
+  const sectionsMap = new Map<string, TaskSection>();
+  for (const task of filteredTasks) {
+    const ugId = task.userGroupId;
+    const tgId = task.groupId;
+    const sectionKey = `${ugId ?? "none"}|${tgId ?? "none"}`;
+    if (!sectionsMap.has(sectionKey)) {
+      sectionsMap.set(sectionKey, {
+        userGroupId: ugId,
+        userGroupName: ugId ? (userGroupMap.get(ugId) ?? "Grupo desconhecido") : null,
+        taskGroupId: tgId,
+        taskGroupName: tgId ? (taskGroupMap.get(tgId)?.name ?? "Grupo desconhecido") : null,
+        tasks: [],
+      });
+    }
+    sectionsMap.get(sectionKey)!.tasks.push(task);
+  }
+
+  // Sort: by user group name, then task group name, ungrouped last
+  const sections = Array.from(sectionsMap.values()).sort((a, b) => {
+    if (a.userGroupId === null && b.userGroupId !== null) return 1;
+    if (a.userGroupId !== null && b.userGroupId === null) return -1;
+    const ugCmp = (a.userGroupName ?? "").localeCompare(b.userGroupName ?? "");
+    if (ugCmp !== 0) return ugCmp;
+    if (a.taskGroupId === null && b.taskGroupId !== null) return 1;
+    if (a.taskGroupId !== null && b.taskGroupId === null) return -1;
+    return (a.taskGroupName ?? "").localeCompare(b.taskGroupName ?? "");
   });
 
   const recurrenceLabels: Record<string, string> = {
@@ -173,41 +206,58 @@ export default async function MinhasTarefasPage({ params }: PageProps) {
           </div>
         )}
 
-        {sortedGroups.map(([groupId, tasks]) => (
-          <div key={groupId ?? "ungrouped"}>
-            <div className="mb-3 flex items-center gap-2">
-              <svg
-                className="h-4 w-4 text-zinc-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"
-                />
-              </svg>
-              {groupId ? (
-                <a
-                  href={`/grupo-tarefas/${groupId}`}
-                  className="text-base font-medium text-zinc-900 transition-colors hover:text-zinc-600 dark:text-zinc-50 dark:hover:text-zinc-300"
-                >
-                  {taskGroupMap.get(groupId) ?? "Grupo desconhecido"}
-                </a>
-              ) : (
-                <span className="text-base font-medium text-zinc-900 dark:text-zinc-50">
-                  Sem grupo
+        {sections.map((section) => (
+          <div key={`${section.userGroupId ?? "none"}-${section.taskGroupId ?? "none"}`}>
+            <div className="mb-3 flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                {section.userGroupId ? (
+                  <a
+                    href={`/grupo/${section.userGroupId}`}
+                    className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+                  >
+                    {section.userGroupName}
+                  </a>
+                ) : (
+                  <span className="text-xs font-medium text-zinc-400 dark:text-zinc-500">
+                    Pessoal
+                  </span>
+                )}
+                <span className="text-xs text-zinc-300 dark:text-zinc-600">›</span>
+                <div className="flex items-center gap-1.5">
+                  <svg
+                    className="h-3.5 w-3.5 text-zinc-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"
+                    />
+                  </svg>
+                  {section.taskGroupId ? (
+                    <a
+                      href={`/grupo-tarefas/${section.taskGroupId}`}
+                      className="text-sm font-medium text-zinc-900 transition-colors hover:text-zinc-600 dark:text-zinc-50 dark:hover:text-zinc-300"
+                    >
+                      {section.taskGroupName}
+                    </a>
+                  ) : (
+                    <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+                      Sem grupo de tarefas
+                    </span>
+                  )}
+                </div>
+                <span className="text-sm text-zinc-400 dark:text-zinc-500">
+                  ({section.tasks.length})
                 </span>
-              )}
-              <span className="text-sm text-zinc-400 dark:text-zinc-500">
-                ({tasks.length})
-              </span>
+              </div>
             </div>
 
             <div className="grid gap-2">
-              {tasks.map((task) => (
+              {section.tasks.map((task) => (
                 <a
                   key={task.id}
                   href={`/tarefa/${task.id}`}
