@@ -51,7 +51,7 @@ export class MongoTaskRepository implements TaskRepositoryPort {
       userGroupId: doc.userGroupId ? doc.userGroupId.toString() : null,
       assignedTo: doc.assignedTo ? doc.assignedTo.toString() : null,
       dueDate: doc.dueDate,
-      recurrence: (doc as unknown as { recurrence: string | null }).recurrence ?? null,
+      recurrence: (doc as unknown as { recurrence: string | null }).recurrence as Task["recurrence"] ?? null,
       recurrenceQuantity: (doc as unknown as { recurrenceQuantity: number }).recurrenceQuantity ?? 1,
       overdue: (doc as unknown as { overdue: boolean }).overdue ?? false,
       createdAt: doc.createdAt,
