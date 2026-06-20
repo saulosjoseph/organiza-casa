@@ -60,6 +60,12 @@ export async function PUT(
     }
     return NextResponse.json(toResponseDto(task));
   } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message === "Task must have a due date or recurrence"
+    ) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
     console.error("Error updating task:", error);
     return NextResponse.json(
       { error: "Failed to update task" },

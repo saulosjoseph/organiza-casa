@@ -45,7 +45,11 @@ export async function POST(request: NextRequest) {
     const task = await useCase.execute(body);
     return NextResponse.json(toResponseDto(task), { status: 201 });
   } catch (error) {
-    if (error instanceof Error && error.message === "Task title is required") {
+    if (
+      error instanceof Error &&
+      (error.message === "Task title is required" ||
+        error.message === "Task must have a due date or recurrence")
+    ) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
     console.error("Error creating task:", error);

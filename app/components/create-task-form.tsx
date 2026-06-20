@@ -36,6 +36,12 @@ export function CreateTaskForm({
     setLoading(true);
     setError("");
 
+    if (!dueDate && !recurrence) {
+      setError("A tarefa precisa ter uma data limite ou uma recorrência.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch("/api/tasks", {
         method: "POST",
@@ -160,7 +166,7 @@ export function CreateTaskForm({
           className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
         >
           Data limite{" "}
-          <span className="text-zinc-400 dark:text-zinc-500">(opcional)</span>
+          <span className="text-zinc-400 dark:text-zinc-500">(ou recorrência)</span>
         </label>
         <input
           id="task-due-date"
@@ -181,7 +187,7 @@ export function CreateTaskForm({
           className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
         >
           Recorrência{" "}
-          <span className="text-zinc-400 dark:text-zinc-500">(opcional)</span>
+          <span className="text-zinc-400 dark:text-zinc-500">(ou data limite)</span>
         </label>
         <select
           id="task-recurrence"

@@ -9,6 +9,9 @@ export class CreateTaskUseCase {
     if (!data.title || data.title.trim().length === 0) {
       throw new Error("Task title is required");
     }
+    if (!data.dueDate && !data.recurrence) {
+      throw new Error("Task must have a due date or recurrence");
+    }
     return this.taskRepository.create(data);
   }
 }
