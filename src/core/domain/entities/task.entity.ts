@@ -6,6 +6,7 @@ export interface Task {
   description: string;
   status: TaskStatus;
   groupId: string | null;
+  userGroupId: string | null;
   assignedTo: string | null;
   dueDate: Date | null;
   createdAt: Date;

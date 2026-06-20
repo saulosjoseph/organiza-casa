@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/src/infrastructure/auth/auth.config";
+import { auth } from "@/src/infrastructure/auth/auth";
 import { MongoUserGroupRepository } from "@/src/infrastructure/database/mongoose/repositories/user-group.repository";
 import { JoinUserGroupUseCase } from "@/src/core/application/use-cases/join-user-group.use-case";
 import { UserGroupResponseDto } from "@/src/core/application/dto/user-group.dto";

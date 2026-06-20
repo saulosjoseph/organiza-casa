@@ -11,6 +11,7 @@ function toEntity(doc: TaskDocument): Task {
     description: doc.description,
     status: doc.status,
     groupId: doc.groupId ? doc.groupId.toString() : null,
+    userGroupId: doc.userGroupId ? doc.userGroupId.toString() : null,
     assignedTo: doc.assignedTo ? doc.assignedTo.toString() : null,
     dueDate: doc.dueDate,
     createdAt: doc.createdAt,
@@ -26,6 +27,7 @@ export class MongoTaskRepository implements TaskRepositoryPort {
       description: data.description ?? "",
       status: data.status ?? "pending",
       groupId: data.groupId ?? null,
+      userGroupId: data.userGroupId ?? null,
       assignedTo: data.assignedTo ?? null,
       dueDate: data.dueDate ? new Date(data.dueDate) : null,
     });
@@ -41,6 +43,7 @@ export class MongoTaskRepository implements TaskRepositoryPort {
       description: doc.description,
       status: doc.status,
       groupId: doc.groupId ? doc.groupId.toString() : null,
+      userGroupId: doc.userGroupId ? doc.userGroupId.toString() : null,
       assignedTo: doc.assignedTo ? doc.assignedTo.toString() : null,
       dueDate: doc.dueDate,
       createdAt: doc.createdAt,
@@ -61,6 +64,7 @@ export class MongoTaskRepository implements TaskRepositoryPort {
     if (data.description !== undefined) updateData.description = data.description;
     if (data.status !== undefined) updateData.status = data.status;
     if (data.groupId !== undefined) updateData.groupId = data.groupId;
+    if (data.userGroupId !== undefined) updateData.userGroupId = data.userGroupId;
     if (data.assignedTo !== undefined) updateData.assignedTo = data.assignedTo;
     if (data.dueDate !== undefined)
       updateData.dueDate = data.dueDate ? new Date(data.dueDate) : null;

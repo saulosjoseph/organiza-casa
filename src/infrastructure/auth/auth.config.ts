@@ -1,10 +1,7 @@
-import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
-import { MongoUserRepository } from "@/src/infrastructure/database/mongoose/repositories/user.repository";
+import type { NextAuthConfig } from "next-auth";
 
-const userRepository = new MongoUserRepository();
-
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const authConfig = {
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -15,32 +12,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/login",
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
-      if (account?.provider === "google" && profile?.sub) {
-        await userRepository.upsertByGoogleId({
-          email: profile.email ?? user.email ?? "",
-          name: profile.name ?? user.name ?? "",
-          image: (profile.picture as string) ?? user.image ?? null,
-          googleId: profile.sub,
-        });
-      }
-      return true;
-    },
-    async jwt({ token, account, profile }) {
-      if (account?.provider === "google" && profile?.sub) {
-        const dbUser = await userRepository.findByGoogleId(profile.sub);
-        if (dbUser) {
-          token.userId = dbUser.id;
-        }
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (token.userId) {
-        session.user.id = token.userId as string;
-      }
-      return session;
-    },
     authorized({ auth: session, request: { nextUrl } }) {
       const isLoggedIn = !!session?.user;
       const isOnLogin = nextUrl.pathname === "/login";
@@ -51,4 +22,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return isLoggedIn;
     },
   },
-});
+} satisfies NextAuthConfig;

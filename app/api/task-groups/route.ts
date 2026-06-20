@@ -10,6 +10,7 @@ function toResponseDto(group: TaskGroup): TaskGroupResponseDto {
     id: group.id,
     name: group.name,
     description: group.description,
+    userGroupId: group.userGroupId,
     assignedTo: group.assignedTo,
     createdAt: group.createdAt.toISOString(),
     updatedAt: group.updatedAt.toISOString(),

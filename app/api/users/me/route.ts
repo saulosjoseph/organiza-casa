@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/src/infrastructure/auth/auth.config";
+import { auth } from "@/src/infrastructure/auth/auth";
 import { MongoUserRepository } from "@/src/infrastructure/database/mongoose/repositories/user.repository";
 import { toUserResponseDto } from "@/src/core/application/dto/user.dto";
 

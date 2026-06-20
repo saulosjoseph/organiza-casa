@@ -1,4 +1,4 @@
-import { signIn } from "@/src/infrastructure/auth/auth.config";
+import { signIn } from "@/src/infrastructure/auth/auth";
 
 export default function LoginPage() {
   return (

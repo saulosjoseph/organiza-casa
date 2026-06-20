@@ -5,6 +5,7 @@ export interface CreateTaskDto {
   description?: string;
   status?: TaskStatus;
   groupId?: string | null;
+  userGroupId?: string | null;
   assignedTo?: string | null;
   dueDate?: string | null;
 }
@@ -14,6 +15,7 @@ export interface UpdateTaskDto {
   description?: string;
   status?: TaskStatus;
   groupId?: string | null;
+  userGroupId?: string | null;
   assignedTo?: string | null;
   dueDate?: string | null;
 }
@@ -24,6 +26,7 @@ export interface TaskResponseDto {
   description: string;
   status: TaskStatus;
   groupId: string | null;
+  userGroupId: string | null;
   assignedTo: string | null;
   dueDate: string | null;
   createdAt: string;

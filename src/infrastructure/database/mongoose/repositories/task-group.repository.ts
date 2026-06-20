@@ -15,6 +15,7 @@ function toEntity(doc: TaskGroupDocument): TaskGroup {
     id: doc._id.toString(),
     name: doc.name,
     description: doc.description,
+    userGroupId: doc.userGroupId ? doc.userGroupId.toString() : null,
     assignedTo: doc.assignedTo ? doc.assignedTo.toString() : null,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
@@ -27,6 +28,7 @@ export class MongoTaskGroupRepository implements TaskGroupRepositoryPort {
     const doc = await TaskGroupModel.create({
       name: data.name,
       description: data.description ?? "",
+      userGroupId: data.userGroupId ?? null,
       assignedTo: data.assignedTo ?? null,
     });
     return toEntity(doc as TaskGroupDocument);
@@ -39,6 +41,7 @@ export class MongoTaskGroupRepository implements TaskGroupRepositoryPort {
       id: doc._id.toString(),
       name: doc.name,
       description: doc.description,
+      userGroupId: doc.userGroupId ? doc.userGroupId.toString() : null,
       assignedTo: doc.assignedTo ? doc.assignedTo.toString() : null,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
@@ -59,6 +62,7 @@ export class MongoTaskGroupRepository implements TaskGroupRepositoryPort {
     const updateData: Record<string, unknown> = {};
     if (data.name !== undefined) updateData.name = data.name;
     if (data.description !== undefined) updateData.description = data.description;
+    if (data.userGroupId !== undefined) updateData.userGroupId = data.userGroupId;
     if (data.assignedTo !== undefined) updateData.assignedTo = data.assignedTo;
 
     const doc = await TaskGroupModel.findByIdAndUpdate(id, updateData, {
