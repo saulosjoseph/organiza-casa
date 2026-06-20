@@ -23,6 +23,7 @@ interface TaskDetailProps {
 export function TaskDetail({ task, members, taskGroups, userGroupId }: TaskDetailProps) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState(task.status);
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description);
   const [status, setStatus] = useState(task.status);
@@ -34,6 +35,7 @@ export function TaskDetail({ task, members, taskGroups, userGroupId }: TaskDetai
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [changingStatus, setChangingStatus] = useState(false);
 
   const statusLabels: Record<string, string> = {
     pending: "Pendente",
@@ -105,6 +107,33 @@ export function TaskDetail({ task, members, taskGroups, userGroupId }: TaskDetai
 
   const assignedMember = members.find((m) => m.id === task.assignedTo);
   const taskGroup = taskGroups.find((g) => g.id === task.groupId);
+
+  async function handleStatusChange(newStatus: string) {
+    setChangingStatus(true);
+    setError("");
+
+    try {
+      const res = await fetch(`/api/tasks/${task.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || "Erro ao atualizar status");
+        return;
+      }
+
+      setCurrentStatus(newStatus);
+      setStatus(newStatus);
+      router.refresh();
+    } catch {
+      setError("Erro ao atualizar status. Tente novamente.");
+    } finally {
+      setChangingStatus(false);
+    }
+  }
 
   if (editing) {
     return (
@@ -252,15 +281,20 @@ export function TaskDetail({ task, members, taskGroups, userGroupId }: TaskDetai
   return (
     <div className="flex flex-col gap-6">
       {/* Title and status */}
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between gap-4">
         <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
           {task.title}
         </h2>
-        <span
-          className={`rounded-full px-3 py-1 text-xs font-medium ${statusColors[task.status] || ""}`}
+        <select
+          value={currentStatus}
+          onChange={(e) => handleStatusChange(e.target.value)}
+          disabled={changingStatus}
+          className={`rounded-full px-3 py-1 text-xs font-medium border-0 cursor-pointer disabled:opacity-50 ${statusColors[currentStatus] || ""}`}
         >
-          {statusLabels[task.status] || task.status}
-        </span>
+          <option value="pending">Pendente</option>
+          <option value="in_progress">Em andamento</option>
+          <option value="done">Concluída</option>
+        </select>
       </div>
 
       {/* Description */}
