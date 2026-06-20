@@ -199,11 +199,11 @@ export function TaskDetail({ task, members, taskGroups, userGroupId }: TaskDetai
   }
 
   const isRecurrentComplete = task.recurrence && completionsInPeriod >= task.recurrenceQuantity;
-  const showActionButton = currentStatus !== "done" || (task.recurrence && !isRecurrentComplete);
+  const showStartButton = currentStatus === "pending";
+  const showCompleteButton = currentStatus !== "pending" && (currentStatus !== "done" || (task.recurrence && !isRecurrentComplete));
 
-  function getActionButtonLabel() {
+  function getCompleteButtonLabel() {
     if (completing) return "Registrando...";
-    if (currentStatus === "pending") return "Iniciar tarefa";
     if (task.recurrence) {
       return `Marcar como feito (${completionsInPeriod}/${task.recurrenceQuantity})`;
     }
@@ -575,14 +575,24 @@ export function TaskDetail({ task, members, taskGroups, userGroupId }: TaskDetai
         <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
       )}
 
-      {/* Action button */}
-      {showActionButton && (
+      {/* Action buttons */}
+      {showStartButton && (
+        <button
+          onClick={() => handleStatusChange("in_progress")}
+          disabled={changingStatus}
+          className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-500 disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-400"
+        >
+          {changingStatus ? "Iniciando..." : "Iniciar tarefa"}
+        </button>
+      )}
+
+      {showCompleteButton && (
         <button
           onClick={handleComplete}
           disabled={completing}
           className="w-full rounded-lg bg-green-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-green-500 disabled:opacity-50 dark:bg-green-500 dark:hover:bg-green-400"
         >
-          {getActionButtonLabel()}
+          {getCompleteButtonLabel()}
         </button>
       )}
 
