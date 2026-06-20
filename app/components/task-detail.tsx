@@ -1,0 +1,329 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+interface TaskDetailProps {
+  task: {
+    id: string;
+    title: string;
+    description: string;
+    status: string;
+    groupId: string | null;
+    assignedTo: string | null;
+    dueDate: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+  members: { id: string; name: string }[];
+  taskGroups: { id: string; name: string }[];
+  userGroupId: string | null;
+}
+
+export function TaskDetail({ task, members, taskGroups, userGroupId }: TaskDetailProps) {
+  const router = useRouter();
+  const [editing, setEditing] = useState(false);
+  const [title, setTitle] = useState(task.title);
+  const [description, setDescription] = useState(task.description);
+  const [status, setStatus] = useState(task.status);
+  const [assignedTo, setAssignedTo] = useState(task.assignedTo || "");
+  const [groupId, setGroupId] = useState(task.groupId || "");
+  const [dueDate, setDueDate] = useState(
+    task.dueDate ? task.dueDate.split("T")[0] : ""
+  );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [deleting, setDeleting] = useState(false);
+
+  const statusLabels: Record<string, string> = {
+    pending: "Pendente",
+    in_progress: "Em andamento",
+    done: "Concluída",
+  };
+
+  const statusColors: Record<string, string> = {
+    pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+    in_progress: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+    done: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+  };
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch(`/api/tasks/${task.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          description: description || undefined,
+          status,
+          assignedTo: assignedTo || null,
+          groupId: groupId || null,
+          dueDate: dueDate || null,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || "Erro ao atualizar tarefa");
+        return;
+      }
+
+      setEditing(false);
+      router.refresh();
+    } catch {
+      setError("Erro ao atualizar tarefa. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!confirm("Tem certeza que deseja excluir esta tarefa?")) return;
+    setDeleting(true);
+
+    try {
+      const res = await fetch(`/api/tasks/${task.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        setError("Erro ao excluir tarefa");
+        return;
+      }
+      if (userGroupId) {
+        router.push(`/grupo/${userGroupId}`);
+      } else {
+        router.push("/");
+      }
+    } catch {
+      setError("Erro ao excluir tarefa. Tente novamente.");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  const assignedMember = members.find((m) => m.id === task.assignedTo);
+  const taskGroup = taskGroups.find((g) => g.id === task.groupId);
+
+  if (editing) {
+    return (
+      <form onSubmit={handleSave} className="flex flex-col gap-5">
+        <div>
+          <label
+            htmlFor="edit-title"
+            className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+          >
+            Título
+          </label>
+          <input
+            id="edit-title"
+            type="text"
+            required
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full rounded-lg border border-zinc-300 bg-white px-3.5 py-2.5 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-400 dark:focus:ring-zinc-400"
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="edit-description"
+            className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+          >
+            Descrição
+          </label>
+          <textarea
+            id="edit-description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={4}
+            className="w-full rounded-lg border border-zinc-300 bg-white px-3.5 py-2.5 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-400 dark:focus:ring-zinc-400"
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="edit-status"
+            className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+          >
+            Status
+          </label>
+          <select
+            id="edit-status"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="w-full rounded-lg border border-zinc-300 bg-white px-3.5 py-2.5 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-400 dark:focus:ring-zinc-400"
+          >
+            <option value="pending">Pendente</option>
+            <option value="in_progress">Em andamento</option>
+            <option value="done">Concluída</option>
+          </select>
+        </div>
+
+        {members.length > 0 && (
+          <div>
+            <label
+              htmlFor="edit-assigned"
+              className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+            >
+              Responsável
+            </label>
+            <select
+              id="edit-assigned"
+              value={assignedTo}
+              onChange={(e) => setAssignedTo(e.target.value)}
+              className="w-full rounded-lg border border-zinc-300 bg-white px-3.5 py-2.5 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-400 dark:focus:ring-zinc-400"
+            >
+              <option value="">Ninguém</option>
+              {members.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {taskGroups.length > 0 && (
+          <div>
+            <label
+              htmlFor="edit-group"
+              className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+            >
+              Grupo de Tarefas
+            </label>
+            <select
+              id="edit-group"
+              value={groupId}
+              onChange={(e) => setGroupId(e.target.value)}
+              className="w-full rounded-lg border border-zinc-300 bg-white px-3.5 py-2.5 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-400 dark:focus:ring-zinc-400"
+            >
+              <option value="">Nenhum</option>
+              {taskGroups.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div>
+          <label
+            htmlFor="edit-due-date"
+            className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+          >
+            Data limite
+          </label>
+          <input
+            id="edit-due-date"
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+            className="w-full rounded-lg border border-zinc-300 bg-white px-3.5 py-2.5 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-400 dark:focus:ring-zinc-400"
+          />
+        </div>
+
+        {error && (
+          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        )}
+
+        <div className="flex gap-3">
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-1 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+          >
+            {loading ? "Salvando..." : "Salvar"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setEditing(false)}
+            className="rounded-lg border border-zinc-300 px-4 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+          >
+            Cancelar
+          </button>
+        </div>
+      </form>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Title and status */}
+      <div className="flex items-start justify-between">
+        <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+          {task.title}
+        </h2>
+        <span
+          className={`rounded-full px-3 py-1 text-xs font-medium ${statusColors[task.status] || ""}`}
+        >
+          {statusLabels[task.status] || task.status}
+        </span>
+      </div>
+
+      {/* Description */}
+      {task.description && (
+        <p className="text-sm text-zinc-600 dark:text-zinc-300 whitespace-pre-wrap">
+          {task.description}
+        </p>
+      )}
+
+      {/* Metadata */}
+      <div className="flex flex-col gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
+        {assignedMember && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-zinc-500 dark:text-zinc-400">Responsável</span>
+            <span className="font-medium text-zinc-900 dark:text-zinc-100">
+              {assignedMember.name}
+            </span>
+          </div>
+        )}
+        {taskGroup && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-zinc-500 dark:text-zinc-400">Grupo de Tarefas</span>
+            <span className="font-medium text-zinc-900 dark:text-zinc-100">
+              {taskGroup.name}
+            </span>
+          </div>
+        )}
+        {task.dueDate && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-zinc-500 dark:text-zinc-400">Data limite</span>
+            <span className="font-medium text-zinc-900 dark:text-zinc-100">
+              {new Date(task.dueDate).toLocaleDateString("pt-BR")}
+            </span>
+          </div>
+        )}
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-zinc-500 dark:text-zinc-400">Criada em</span>
+          <span className="text-zinc-600 dark:text-zinc-300">
+            {new Date(task.createdAt).toLocaleDateString("pt-BR")}
+          </span>
+        </div>
+      </div>
+
+      {error && (
+        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+      )}
+
+      {/* Actions */}
+      <div className="flex gap-3">
+        <button
+          onClick={() => setEditing(true)}
+          className="flex-1 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+        >
+          Editar
+        </button>
+        <button
+          onClick={handleDelete}
+          disabled={deleting}
+          className="rounded-lg border border-red-300 px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
+        >
+          {deleting ? "Excluindo..." : "Excluir"}
+        </button>
+      </div>
+    </div>
+  );
+}

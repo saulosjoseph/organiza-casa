@@ -204,7 +204,10 @@ function TaskCard({ task }: { task: Task }) {
   };
 
   return (
-    <div className="flex items-center justify-between rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-950">
+    <a
+      href={`/tarefa/${task.id}`}
+      className="flex items-center justify-between rounded-lg border border-zinc-200 bg-white px-4 py-3 transition-colors hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700 dark:hover:bg-zinc-900"
+    >
       <div className="flex flex-col">
         <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
           {task.title}
@@ -227,6 +230,6 @@ function TaskCard({ task }: { task: Task }) {
           {statusLabels[task.status] || task.status}
         </span>
       </div>
-    </div>
+    </a>
   );
 }
