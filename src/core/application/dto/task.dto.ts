@@ -1,4 +1,4 @@
-import { TaskStatus } from "@/src/core/domain/entities/task.entity";
+import { TaskStatus, TaskRecurrence } from "@/src/core/domain/entities/task.entity";
 
 export interface CreateTaskDto {
   title: string;
@@ -8,6 +8,7 @@ export interface CreateTaskDto {
   userGroupId?: string | null;
   assignedTo?: string | null;
   dueDate?: string | null;
+  recurrence?: TaskRecurrence;
 }
 
 export interface UpdateTaskDto {
@@ -18,6 +19,7 @@ export interface UpdateTaskDto {
   userGroupId?: string | null;
   assignedTo?: string | null;
   dueDate?: string | null;
+  recurrence?: TaskRecurrence;
 }
 
 export interface TaskResponseDto {
@@ -29,6 +31,7 @@ export interface TaskResponseDto {
   userGroupId: string | null;
   assignedTo: string | null;
   dueDate: string | null;
+  recurrence: TaskRecurrence;
   createdAt: string;
   updatedAt: string;
 }

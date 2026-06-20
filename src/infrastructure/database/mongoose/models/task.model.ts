@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
-import { TaskStatus } from "@/src/core/domain/entities/task.entity";
+import { TaskStatus, TaskRecurrence } from "@/src/core/domain/entities/task.entity";
 
 export interface TaskDocument extends Document {
   title: string;
@@ -9,6 +9,7 @@ export interface TaskDocument extends Document {
   userGroupId: mongoose.Types.ObjectId | null;
   assignedTo: mongoose.Types.ObjectId | null;
   dueDate: Date | null;
+  recurrence: TaskRecurrence;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,6 +27,11 @@ const TaskSchema = new Schema<TaskDocument>(
     userGroupId: { type: Schema.Types.ObjectId, ref: "UserGroup", default: null },
     assignedTo: { type: Schema.Types.ObjectId, ref: "User", default: null },
     dueDate: { type: Date, default: null },
+    recurrence: {
+      type: String,
+      enum: ["daily", "weekly", "monthly", null],
+      default: null,
+    },
   },
   {
     timestamps: true,

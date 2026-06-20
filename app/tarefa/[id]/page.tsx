@@ -70,6 +70,7 @@ export default async function TarefaPage({ params }: PageProps) {
     groupId: task.groupId,
     assignedTo: task.assignedTo,
     dueDate: task.dueDate ? task.dueDate.toISOString() : null,
+    recurrence: task.recurrence,
     createdAt: task.createdAt.toISOString(),
     updatedAt: task.updatedAt.toISOString(),
   };

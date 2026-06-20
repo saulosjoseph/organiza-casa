@@ -17,6 +17,7 @@ interface Task {
   status: string;
   groupId: string | null;
   dueDate: string | null;
+  recurrence: string | null;
 }
 
 interface Member {
@@ -206,6 +207,12 @@ function TaskCard({ task }: { task: Task }) {
     done: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
   };
 
+  const recurrenceLabels: Record<string, string> = {
+    daily: "Diária",
+    weekly: "Semanal",
+    monthly: "Mensal",
+  };
+
   return (
     <a
       href={`/tarefa/${task.id}`}
@@ -225,6 +232,11 @@ function TaskCard({ task }: { task: Task }) {
         {task.dueDate && (
           <span className="text-xs text-zinc-400 dark:text-zinc-500">
             {new Date(task.dueDate).toLocaleDateString("pt-BR")}
+          </span>
+        )}
+        {task.recurrence && (
+          <span className="text-xs text-zinc-400 dark:text-zinc-500">
+            🔄 {recurrenceLabels[task.recurrence]}
           </span>
         )}
         <span

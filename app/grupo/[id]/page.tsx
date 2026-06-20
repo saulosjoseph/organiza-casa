@@ -61,6 +61,7 @@ export default async function GrupoPage({ params }: PageProps) {
       status: t.status,
       groupId: t.groupId,
       dueDate: t.dueDate ? t.dueDate.toISOString() : null,
+      recurrence: t.recurrence,
     }));
 
   const taskGroups = allTaskGroups

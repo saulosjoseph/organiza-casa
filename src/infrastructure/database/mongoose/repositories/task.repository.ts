@@ -14,6 +14,7 @@ function toEntity(doc: TaskDocument): Task {
     userGroupId: doc.userGroupId ? doc.userGroupId.toString() : null,
     assignedTo: doc.assignedTo ? doc.assignedTo.toString() : null,
     dueDate: doc.dueDate,
+    recurrence: doc.recurrence ?? null,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
   };
@@ -30,6 +31,7 @@ export class MongoTaskRepository implements TaskRepositoryPort {
       userGroupId: data.userGroupId ?? null,
       assignedTo: data.assignedTo ?? null,
       dueDate: data.dueDate ? new Date(data.dueDate) : null,
+      recurrence: data.recurrence ?? null,
     });
     return toEntity(doc as TaskDocument);
   }
@@ -46,6 +48,7 @@ export class MongoTaskRepository implements TaskRepositoryPort {
       userGroupId: doc.userGroupId ? doc.userGroupId.toString() : null,
       assignedTo: doc.assignedTo ? doc.assignedTo.toString() : null,
       dueDate: doc.dueDate,
+      recurrence: (doc as unknown as { recurrence: string | null }).recurrence ?? null,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
     }));
@@ -68,6 +71,7 @@ export class MongoTaskRepository implements TaskRepositoryPort {
     if (data.assignedTo !== undefined) updateData.assignedTo = data.assignedTo;
     if (data.dueDate !== undefined)
       updateData.dueDate = data.dueDate ? new Date(data.dueDate) : null;
+    if (data.recurrence !== undefined) updateData.recurrence = data.recurrence;
 
     const doc = await TaskModel.findByIdAndUpdate(id, updateData, {
       new: true,

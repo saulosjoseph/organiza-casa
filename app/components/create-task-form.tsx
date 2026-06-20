@@ -27,6 +27,7 @@ export function CreateTaskForm({
   const [groupId, setGroupId] = useState("");
   const [assignedTo, setAssignedTo] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [recurrence, setRecurrence] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -46,6 +47,7 @@ export function CreateTaskForm({
           groupId: groupId || null,
           assignedTo: assignedTo || null,
           dueDate: dueDate || null,
+          recurrence: recurrence || null,
         }),
       });
 
@@ -164,9 +166,38 @@ export function CreateTaskForm({
           id="task-due-date"
           type="date"
           value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
-          className="w-full rounded-lg border border-zinc-300 bg-white px-3.5 py-2.5 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:border-zinc-400 dark:focus:ring-zinc-400"
+          onChange={(e) => {
+            setDueDate(e.target.value);
+            if (e.target.value) setRecurrence("");
+          }}
+          disabled={!!recurrence}
+          className="w-full rounded-lg border border-zinc-300 bg-white px-3.5 py-2.5 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:border-zinc-400 dark:focus:ring-zinc-400"
         />
+      </div>
+
+      <div>
+        <label
+          htmlFor="task-recurrence"
+          className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+        >
+          Recorrência{" "}
+          <span className="text-zinc-400 dark:text-zinc-500">(opcional)</span>
+        </label>
+        <select
+          id="task-recurrence"
+          value={recurrence}
+          onChange={(e) => {
+            setRecurrence(e.target.value);
+            if (e.target.value) setDueDate("");
+          }}
+          disabled={!!dueDate}
+          className="w-full rounded-lg border border-zinc-300 bg-white px-3.5 py-2.5 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-400 dark:focus:ring-zinc-400"
+        >
+          <option value="">Nenhuma</option>
+          <option value="daily">Diária</option>
+          <option value="weekly">Semanal</option>
+          <option value="monthly">Mensal</option>
+        </select>
       </div>
 
       {error && (

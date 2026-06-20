@@ -15,6 +15,7 @@ function toResponseDto(task: Task): TaskResponseDto {
     userGroupId: task.userGroupId,
     assignedTo: task.assignedTo,
     dueDate: task.dueDate ? task.dueDate.toISOString() : null,
+    recurrence: task.recurrence,
     createdAt: task.createdAt.toISOString(),
     updatedAt: task.updatedAt.toISOString(),
   };
