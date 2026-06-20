@@ -9,6 +9,7 @@ import { ListTaskGroupsUseCase } from "@/src/core/application/use-cases/list-tas
 import { redirect } from "next/navigation";
 import { notFound } from "next/navigation";
 import { GroupContent } from "@/app/components/group-content";
+import { ShareLinkButton } from "@/app/components/share-link-button";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -73,35 +74,38 @@ export default async function GrupoPage({ params }: PageProps) {
   return (
     <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 dark:bg-black">
       <main className="flex flex-1 w-full max-w-3xl flex-col gap-8 py-12 px-6">
-        <div className="flex items-center gap-4">
-          <a
-            href="/"
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 text-zinc-500 transition-colors hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900"
-          >
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <a
+              href="/"
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 text-zinc-500 transition-colors hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15.75 19.5 8.25 12l7.5-7.5"
-              />
-            </svg>
-          </a>
-          <div>
-            <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-              {group.name}
-            </h1>
-            {group.description && (
-              <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
-                {group.description}
-              </p>
-            )}
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15.75 19.5 8.25 12l7.5-7.5"
+                />
+              </svg>
+            </a>
+            <div>
+              <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+                {group.name}
+              </h1>
+              {group.description && (
+                <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
+                  {group.description}
+                </p>
+              )}
+            </div>
           </div>
+          <ShareLinkButton inviteCode={group.inviteCode} />
         </div>
 
         <GroupContent
