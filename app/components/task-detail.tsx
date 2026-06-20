@@ -13,6 +13,7 @@ interface TaskDetailProps {
     assignedTo: string | null;
     dueDate: string | null;
     recurrence: string | null;
+    overdue: boolean;
     createdAt: string;
     updatedAt: string;
   };
@@ -313,9 +314,16 @@ export function TaskDetail({ task, members, taskGroups, userGroupId }: TaskDetai
     <div className="flex flex-col gap-6">
       {/* Title and status */}
       <div className="flex items-start justify-between gap-4">
-        <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-          {task.title}
-        </h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+            {task.title}
+          </h2>
+          {task.overdue && (
+            <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-400">
+              Em atraso
+            </span>
+          )}
+        </div>
         <select
           value={currentStatus}
           onChange={(e) => handleStatusChange(e.target.value)}

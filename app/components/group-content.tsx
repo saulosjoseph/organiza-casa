@@ -18,6 +18,7 @@ interface Task {
   groupId: string | null;
   dueDate: string | null;
   recurrence: string | null;
+  overdue: boolean;
 }
 
 interface Member {
@@ -270,6 +271,11 @@ function TaskCard({ task }: { task: Task }) {
         )}
       </div>
       <div className="flex items-center gap-3">
+        {task.overdue && (
+          <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-400">
+            Em atraso
+          </span>
+        )}
         {task.dueDate && (
           <span className="text-xs text-zinc-400 dark:text-zinc-500">
             {new Date(task.dueDate).toLocaleDateString("pt-BR")}
