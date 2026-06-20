@@ -100,15 +100,15 @@ export async function AppHeader() {
           <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-700" />
 
           <div className="flex items-center gap-2">
-            <span className="rounded-full bg-yellow-100 px-2.5 py-1 text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400" title="Tarefas pendentes">
+            <a href="/minhas-tarefas/pendentes" className="rounded-full bg-yellow-100 px-2.5 py-1 text-xs font-medium text-yellow-800 transition-colors hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:hover:bg-yellow-900/50" title="Tarefas pendentes">
               {stats.pendingCount} pend.
-            </span>
-            <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" title="Tarefas em progresso">
+            </a>
+            <a href="/minhas-tarefas/em-progresso" className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-medium text-blue-800 transition-colors hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50" title="Tarefas em progresso">
               {stats.inProgressCount} prog.
-            </span>
-            <span className="rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400" title="Concluídas na semana / no ano">
+            </a>
+            <a href="/minhas-tarefas/concluidas" className="rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-800 transition-colors hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50" title="Concluídas na semana / no ano">
               ✓ {stats.completedWeek} sem · {stats.completedYear} ano
-            </span>
+            </a>
           </div>
 
           <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-700" />
