@@ -90,4 +90,12 @@ export class MongoTaskRepository implements TaskRepositoryPort {
     const result = await TaskModel.findByIdAndDelete(id);
     return result !== null;
   }
+
+  async updateManyByGroupId(groupId: string, data: UpdateTaskDto): Promise<void> {
+    await connectToDatabase();
+    const updateData: Record<string, unknown> = {};
+    if (data.assignedTo !== undefined) updateData.assignedTo = data.assignedTo;
+
+    await TaskModel.updateMany({ groupId }, updateData);
+  }
 }

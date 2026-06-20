@@ -35,6 +35,7 @@ export function TaskGroupDetail({
   const [name, setName] = useState(taskGroup.name);
   const [description, setDescription] = useState(taskGroup.description);
   const [assignedTo, setAssignedTo] = useState(taskGroup.assignedTo || "");
+  const [applyToAllTasks, setApplyToAllTasks] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
@@ -66,6 +67,7 @@ export function TaskGroupDetail({
           name,
           description: description || undefined,
           assignedTo: assignedTo || null,
+          applyAssignedToAllTasks: applyToAllTasks,
         }),
       });
 
@@ -76,6 +78,7 @@ export function TaskGroupDetail({
       }
 
       setEditing(false);
+      setApplyToAllTasks(false);
       router.refresh();
     } catch {
       setError("Erro ao atualizar grupo de tarefas. Tente novamente.");
@@ -167,6 +170,20 @@ export function TaskGroupDetail({
                 </option>
               ))}
             </select>
+
+            {tasks.length > 0 && (
+              <label className="mt-2 flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={applyToAllTasks}
+                  onChange={(e) => setApplyToAllTasks(e.target.checked)}
+                  className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800 dark:focus:ring-zinc-400"
+                />
+                <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                  Aplicar responsável a todas as tarefas do grupo
+                </span>
+              </label>
+            )}
           </div>
         )}
 

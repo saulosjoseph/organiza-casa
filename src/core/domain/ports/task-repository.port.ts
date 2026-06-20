@@ -6,5 +6,6 @@ export interface TaskRepositoryPort {
   findAll(): Promise<Task[]>;
   findById(id: string): Promise<Task | null>;
   update(id: string, data: UpdateTaskDto): Promise<Task | null>;
+  updateManyByGroupId(groupId: string, data: UpdateTaskDto): Promise<void>;
   delete(id: string): Promise<boolean>;
 }

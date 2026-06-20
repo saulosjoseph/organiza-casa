@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MongoTaskGroupRepository } from "@/src/infrastructure/database/mongoose/repositories/task-group.repository";
+import { MongoTaskRepository } from "@/src/infrastructure/database/mongoose/repositories/task.repository";
 import { GetTaskGroupUseCase } from "@/src/core/application/use-cases/get-task-group.use-case";
 import { UpdateTaskGroupUseCase } from "@/src/core/application/use-cases/update-task-group.use-case";
 import { DeleteTaskGroupUseCase } from "@/src/core/application/use-cases/delete-task-group.use-case";
@@ -19,6 +20,7 @@ function toResponseDto(group: TaskGroup): TaskGroupResponseDto {
 }
 
 const repository = new MongoTaskGroupRepository();
+const taskRepository = new MongoTaskRepository();
 
 export async function GET(
   _request: NextRequest,
@@ -51,14 +53,22 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
+    const { applyAssignedToAllTasks, ...updateData } = body;
     const useCase = new UpdateTaskGroupUseCase(repository);
-    const group = await useCase.execute(id, body);
+    const group = await useCase.execute(id, updateData);
     if (!group) {
       return NextResponse.json(
         { error: "Task group not found" },
         { status: 404 }
       );
     }
+
+    if (applyAssignedToAllTasks && updateData.assignedTo !== undefined) {
+      await taskRepository.updateManyByGroupId(id, {
+        assignedTo: updateData.assignedTo,
+      });
+    }
+
     return NextResponse.json(toResponseDto(group));
   } catch (error) {
     console.error("Error updating task group:", error);
