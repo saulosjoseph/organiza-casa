@@ -15,7 +15,7 @@ function toEntity(doc: TaskGroupDocument): TaskGroup {
     id: doc._id.toString(),
     name: doc.name,
     description: doc.description,
-    assignedTo: doc.assignedTo,
+    assignedTo: doc.assignedTo ? doc.assignedTo.toString() : null,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
   };
@@ -39,7 +39,7 @@ export class MongoTaskGroupRepository implements TaskGroupRepositoryPort {
       id: doc._id.toString(),
       name: doc.name,
       description: doc.description,
-      assignedTo: doc.assignedTo,
+      assignedTo: doc.assignedTo ? doc.assignedTo.toString() : null,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
     }));

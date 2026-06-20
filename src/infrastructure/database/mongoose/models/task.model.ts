@@ -6,7 +6,7 @@ export interface TaskDocument extends Document {
   description: string;
   status: TaskStatus;
   groupId: mongoose.Types.ObjectId | null;
-  assignedTo: string | null;
+  assignedTo: mongoose.Types.ObjectId | null;
   dueDate: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -22,7 +22,7 @@ const TaskSchema = new Schema<TaskDocument>(
       default: "pending",
     },
     groupId: { type: Schema.Types.ObjectId, ref: "TaskGroup", default: null },
-    assignedTo: { type: String, default: null },
+    assignedTo: { type: Schema.Types.ObjectId, ref: "User", default: null },
     dueDate: { type: Date, default: null },
   },
   {
