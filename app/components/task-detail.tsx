@@ -395,8 +395,7 @@ export function TaskDetail({ task, members, taskGroups, userGroupId }: TaskDetai
           <div className="flex items-center justify-between text-sm">
             <span className="text-zinc-500 dark:text-zinc-400">Recorrência</span>
             <span className="font-medium text-zinc-900 dark:text-zinc-100">
-              {task.recurrence === "daily" ? "Diária" : task.recurrence === "weekly" ? "Semanal" : "Mensal"}
-              {task.recurrenceQuantity > 1 && ` (${task.recurrenceQuantity}x)`}
+              {task.recurrence === "daily" ? "Diária" : task.recurrence === "weekly" ? "Semanal" : "Mensal"} — {task.recurrenceQuantity}x
             </span>
           </div>
         )}

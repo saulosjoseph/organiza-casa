@@ -284,7 +284,7 @@ function TaskCard({ task }: { task: Task }) {
         )}
         {task.recurrence && (
           <span className="text-xs text-zinc-400 dark:text-zinc-500">
-            🔄 {recurrenceLabels[task.recurrence]}{task.recurrenceQuantity > 1 ? ` (${task.recurrenceQuantity}x)` : ""}
+            🔄 {recurrenceLabels[task.recurrence]} {task.recurrenceQuantity}x
           </span>
         )}
         <span
