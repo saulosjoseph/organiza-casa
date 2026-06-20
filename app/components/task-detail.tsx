@@ -468,18 +468,37 @@ export function TaskDetail({ task, members, taskGroups, userGroupId }: TaskDetai
           </div>
         )}
         {task.recurrence && (
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-zinc-500 dark:text-zinc-400">Progresso no período</span>
-              <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                {completionsInPeriod}/{task.recurrenceQuantity}
-              </span>
-            </div>
-            <div className="h-2 w-full rounded-full bg-zinc-200 dark:bg-zinc-800">
-              <div
-                className="h-2 rounded-full bg-green-500 transition-all dark:bg-green-400"
-                style={{ width: `${Math.min(100, (completionsInPeriod / task.recurrenceQuantity) * 100)}%` }}
-              />
+          <div className="flex flex-col gap-2">
+            <span className="text-sm text-zinc-500 dark:text-zinc-400">
+              Progresso no período ({completionsInPeriod}/{task.recurrenceQuantity})
+            </span>
+            <div className="flex flex-col gap-1.5">
+              {Array.from({ length: task.recurrenceQuantity }, (_, i) => (
+                <div key={i} className="flex items-center gap-2.5">
+                  <div
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                      i < completionsInPeriod
+                        ? "border-green-500 bg-green-500 dark:border-green-400 dark:bg-green-400"
+                        : "border-zinc-300 dark:border-zinc-600"
+                    }`}
+                  >
+                    {i < completionsInPeriod && (
+                      <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                  <span
+                    className={`text-sm ${
+                      i < completionsInPeriod
+                        ? "text-zinc-500 line-through dark:text-zinc-500"
+                        : "text-zinc-700 dark:text-zinc-300"
+                    }`}
+                  >
+                    {i + 1}ª vez
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         )}
