@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { AppHeader } from "@/app/components/app-header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,6 +38,7 @@ export default function RootLayout({
           backgroundAttachment: "fixed",
         }}
       >
+        <AppHeader />
         {children}
       </body>
     </html>
