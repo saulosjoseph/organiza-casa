@@ -16,7 +16,7 @@ export default async function ConvitePage({ params }: PageProps) {
 
   if (!group) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
+      <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-transparent">
         <div className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-8 text-center shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
             <svg
@@ -56,7 +56,7 @@ export default async function ConvitePage({ params }: PageProps) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
+    <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-transparent">
       <div className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
         <div className="mb-6 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-900">

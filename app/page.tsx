@@ -20,7 +20,7 @@ export default async function Home() {
   }
 
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 dark:bg-black">
+    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 dark:bg-transparent">
       <main className="flex flex-1 w-full max-w-3xl flex-col gap-8 py-12 px-6">
         <HomeContent groups={groups} />
       </main>
