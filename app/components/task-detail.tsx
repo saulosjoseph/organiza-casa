@@ -210,6 +210,40 @@ export function TaskDetail({ task, members, taskGroups, userGroupId }: TaskDetai
     return "Marcar como feito";
   }
 
+  async function handleUndo() {
+    setCompleting(true);
+    setError("");
+
+    try {
+      const res = await fetch(`/api/tasks/${task.id}/complete`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || "Erro ao desfazer conclusão");
+        return;
+      }
+
+      const data = await res.json();
+      setCompletionsInPeriod(data.completionsInPeriod);
+
+      if (data.completionsInPeriod === 0) {
+        setCurrentStatus("pending");
+        setStatus("pending");
+      } else {
+        setCurrentStatus("in_progress");
+        setStatus("in_progress");
+      }
+
+      router.refresh();
+    } catch {
+      setError("Erro ao desfazer conclusão. Tente novamente.");
+    } finally {
+      setCompleting(false);
+    }
+  }
+
   if (editing) {
     return (
       <form onSubmit={handleSave} className="flex flex-col gap-5">
@@ -473,32 +507,59 @@ export function TaskDetail({ task, members, taskGroups, userGroupId }: TaskDetai
               Progresso no período ({completionsInPeriod}/{task.recurrenceQuantity})
             </span>
             <div className="flex flex-col gap-1.5">
-              {Array.from({ length: task.recurrenceQuantity }, (_, i) => (
-                <div key={i} className="flex items-center gap-2.5">
-                  <div
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-                      i < completionsInPeriod
-                        ? "border-green-500 bg-green-500 dark:border-green-400 dark:bg-green-400"
-                        : "border-zinc-300 dark:border-zinc-600"
+              {Array.from({ length: task.recurrenceQuantity }, (_, i) => {
+                const isCompleted = i < completionsInPeriod;
+                const isLastCompleted = i === completionsInPeriod - 1;
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    disabled={completing || (!isLastCompleted && isCompleted) || (!isCompleted && i !== completionsInPeriod)}
+                    onClick={() => {
+                      if (isLastCompleted) {
+                        handleUndo();
+                      } else if (i === completionsInPeriod) {
+                        handleComplete();
+                      }
+                    }}
+                    className={`flex items-center gap-2.5 rounded-lg px-2 py-1 transition-colors disabled:cursor-default ${
+                      isLastCompleted
+                        ? "cursor-pointer hover:bg-red-50 dark:hover:bg-red-950/30"
+                        : i === completionsInPeriod
+                          ? "cursor-pointer hover:bg-green-50 dark:hover:bg-green-950/30"
+                          : ""
                     }`}
                   >
-                    {i < completionsInPeriod && (
-                      <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
+                    <div
+                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                        isCompleted
+                          ? "border-green-500 bg-green-500 dark:border-green-400 dark:bg-green-400"
+                          : i === completionsInPeriod
+                            ? "border-zinc-400 dark:border-zinc-500"
+                            : "border-zinc-300 dark:border-zinc-600"
+                      }`}
+                    >
+                      {isCompleted && (
+                        <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </div>
+                    <span
+                      className={`text-sm ${
+                        isCompleted
+                          ? "text-zinc-500 line-through dark:text-zinc-500"
+                          : "text-zinc-700 dark:text-zinc-300"
+                      }`}
+                    >
+                      {i + 1}ª vez
+                    </span>
+                    {isLastCompleted && (
+                      <span className="ml-auto text-xs text-zinc-400 dark:text-zinc-500">desfazer</span>
                     )}
-                  </div>
-                  <span
-                    className={`text-sm ${
-                      i < completionsInPeriod
-                        ? "text-zinc-500 line-through dark:text-zinc-500"
-                        : "text-zinc-700 dark:text-zinc-300"
-                    }`}
-                  >
-                    {i + 1}ª vez
-                  </span>
-                </div>
-              ))}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}

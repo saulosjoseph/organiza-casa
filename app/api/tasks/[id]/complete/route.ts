@@ -118,3 +118,46 @@ export async function GET(
     );
   }
 }
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    const task = await taskRepository.findById(id);
+    if (!task) {
+      return NextResponse.json({ error: "Task not found" }, { status: 404 });
+    }
+
+    if (!task.recurrence) {
+      // Non-recurrent: just set back to pending
+      await taskRepository.update(id, { status: "pending" });
+      return NextResponse.json({ completionsInPeriod: 0 });
+    }
+
+    const { start, end } = getPeriodBounds(task.recurrence);
+    const deleted = await completionRepository.deleteLatestInPeriod(id, start, end);
+
+    if (!deleted) {
+      return NextResponse.json({ error: "No completion to undo" }, { status: 400 });
+    }
+
+    const count = await completionRepository.countInPeriod(id, start, end);
+
+    if (count === 0) {
+      await taskRepository.update(id, { status: "pending" });
+    } else {
+      await taskRepository.update(id, { status: "in_progress" });
+    }
+
+    return NextResponse.json({ completionsInPeriod: count });
+  } catch (error) {
+    console.error("Error undoing completion:", error);
+    return NextResponse.json(
+      { error: "Failed to undo completion" },
+      { status: 500 }
+    );
+  }
+}

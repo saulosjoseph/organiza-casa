@@ -39,4 +39,16 @@ export class MongoTaskCompletionRepository implements TaskCompletionRepositoryPo
     const docs = await TaskCompletionModel.find({ taskId }).sort({ completedAt: -1 });
     return docs.map((doc) => toEntity(doc as TaskCompletionDocument));
   }
+
+  async deleteLatestInPeriod(taskId: string, periodStart: Date, periodEnd: Date): Promise<boolean> {
+    await connectToDatabase();
+    const doc = await TaskCompletionModel.findOneAndDelete(
+      {
+        taskId,
+        completedAt: { $gte: periodStart, $lt: periodEnd },
+      },
+      { sort: { completedAt: -1 } }
+    );
+    return doc !== null;
+  }
 }
