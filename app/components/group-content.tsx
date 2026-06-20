@@ -46,6 +46,29 @@ export function GroupContent({
     tasks: tasks.filter((t) => t.groupId === g.id),
   }));
 
+  const statusOrder = ["pending", "in_progress", "done"] as const;
+  const statusLabels: Record<string, string> = {
+    pending: "Pendente",
+    in_progress: "Em andamento",
+    done: "Concluída",
+  };
+  const statusColors: Record<string, string> = {
+    pending: "text-yellow-600 dark:text-yellow-400",
+    in_progress: "text-blue-600 dark:text-blue-400",
+    done: "text-green-600 dark:text-green-400",
+  };
+
+  function groupByStatus(taskList: Task[]) {
+    return statusOrder
+      .map((status) => ({
+        status,
+        label: statusLabels[status],
+        color: statusColors[status],
+        tasks: taskList.filter((t) => t.status === status),
+      }))
+      .filter((g) => g.tasks.length > 0);
+  }
+
   return (
     <div className="flex flex-col gap-8">
       {/* Action buttons */}
@@ -152,9 +175,18 @@ export function GroupContent({
               Nenhuma tarefa neste grupo.
             </p>
           ) : (
-            <div className="grid gap-2">
-              {group.tasks.map((task) => (
-                <TaskCard key={task.id} task={task} />
+            <div className="ml-2 flex flex-col gap-4">
+              {groupByStatus(group.tasks).map((statusGroup) => (
+                <div key={statusGroup.status}>
+                  <h4 className={`mb-2 text-xs font-semibold uppercase tracking-wide ${statusGroup.color}`}>
+                    {statusGroup.label}
+                  </h4>
+                  <div className="grid gap-2">
+                    {statusGroup.tasks.map((task) => (
+                      <TaskCard key={task.id} task={task} />
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           )}
@@ -169,9 +201,18 @@ export function GroupContent({
               Tarefas sem grupo
             </h3>
           )}
-          <div className="grid gap-2">
-            {ungroupedTasks.map((task) => (
-              <TaskCard key={task.id} task={task} />
+          <div className="flex flex-col gap-4">
+            {groupByStatus(ungroupedTasks).map((statusGroup) => (
+              <div key={statusGroup.status}>
+                <h4 className={`mb-2 text-xs font-semibold uppercase tracking-wide ${statusGroup.color}`}>
+                  {statusGroup.label}
+                </h4>
+                <div className="grid gap-2">
+                  {statusGroup.tasks.map((task) => (
+                    <TaskCard key={task.id} task={task} />
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </div>
