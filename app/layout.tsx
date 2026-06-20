@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Organiza Casa",
-  description: "Organize as tarefas da sua casa",
+  title: "Organiza",
+  description: "Organize tarefas",
 };
 
 export default function RootLayout({
