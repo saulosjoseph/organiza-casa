@@ -15,6 +15,7 @@ function toEntity(doc: TaskGroupDocument): TaskGroup {
     id: doc._id.toString(),
     name: doc.name,
     description: doc.description,
+    assignedTo: doc.assignedTo,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
   };
@@ -26,6 +27,7 @@ export class MongoTaskGroupRepository implements TaskGroupRepositoryPort {
     const doc = await TaskGroupModel.create({
       name: data.name,
       description: data.description ?? "",
+      assignedTo: data.assignedTo ?? null,
     });
     return toEntity(doc as TaskGroupDocument);
   }
@@ -37,6 +39,7 @@ export class MongoTaskGroupRepository implements TaskGroupRepositoryPort {
       id: doc._id.toString(),
       name: doc.name,
       description: doc.description,
+      assignedTo: doc.assignedTo,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
     }));
@@ -56,6 +59,7 @@ export class MongoTaskGroupRepository implements TaskGroupRepositoryPort {
     const updateData: Record<string, unknown> = {};
     if (data.name !== undefined) updateData.name = data.name;
     if (data.description !== undefined) updateData.description = data.description;
+    if (data.assignedTo !== undefined) updateData.assignedTo = data.assignedTo;
 
     const doc = await TaskGroupModel.findByIdAndUpdate(id, updateData, {
       new: true,
